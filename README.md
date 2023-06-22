@@ -18,7 +18,7 @@ Whether you're a designer, engineer, hobbyist, or 3D printing enthusiast, MeshMi
 1. Visit our website.
 2. Click on the "Upload" button to upload your .STL file.
 3. Once your model is uploaded and rendered, click on the "Mirror" button to create a mirrored version of your model.
-4. When your mirrored model is ready, click on the "Export" button to download the mirrored .STL file.
+4. When your mirrored model is ready, click on the "Export Mirrored .STL" button to download the mirrored .STL file.
 
 MeshMirror doesn't store any of your data or 3D models, ensuring your designs remain secure and private.
 
