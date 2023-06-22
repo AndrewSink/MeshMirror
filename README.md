@@ -1,4 +1,4 @@
-# MeshMirror: Mirror Your 3D Mesh Models Effortlessly 
+# MeshMirror: Mirror Your 3D Models Effortlessly 
 
 Live Build: https://andrewsink.github.io/MeshMirror/
 
