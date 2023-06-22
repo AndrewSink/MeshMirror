@@ -2,7 +2,7 @@
 
 Live Build: https://andrewsink.github.io/MeshMirror/
 
-![MeshMirror](https://github.com/AndrewSink/MeshMirror/assets/46334898/36d548d7-1e96-4785-a720-ffb3958a79f8)
+![MeshMirror](https://github.com/AndrewSink/MeshMirror/assets/46334898/1a40cbe3-65e0-4ea1-97ba-97a7af2342d8)
 
 
 MeshMirror is an intuitive and user-friendly web application designed to simplify the process of mirroring 3D mesh models in .STL format. With a simple click, users can effortlessly mirror their 3D models without the need for any CAD or mesh editing software. 
