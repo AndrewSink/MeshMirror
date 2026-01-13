@@ -45,13 +45,13 @@ loader.load('toad.stl', function (geometry) {
     const bbox = new THREE.Box3().setFromObject(mesh);
     const center = bbox.getCenter(new THREE.Vector3());
     geometry.translate(-center.x, -center.y, -center.z);
-    
+
     // Position mesh towards the left, accounting for mirrored space
     const size = bbox.getSize(new THREE.Vector3());
     geometry.translate(-size.x * 0.5, 0, 0);
 
     scene.add(mesh);
-    
+
     // Position camera for optimal viewing
     positionCamera(mesh, null);
 }, undefined, function (error) {
@@ -73,13 +73,13 @@ let transformControls;
 // Helper function to position camera for optimal viewing
 function positionCamera(mesh, mirrorMesh = null) {
     let box, size, center, maxDim;
-    
+
     if (mirrorMesh) {
         // Calculate bounding box that encompasses both models
         box = new THREE.Box3().setFromObject(mesh);
         const mirrorBox = new THREE.Box3().setFromObject(mirrorMesh);
         box.union(mirrorBox); // Combine both bounding boxes
-        
+
         size = box.getSize(new THREE.Vector3());
         center = box.getCenter(new THREE.Vector3());
         maxDim = Math.max(size.x, size.y, size.z);
@@ -90,22 +90,22 @@ function positionCamera(mesh, mirrorMesh = null) {
         center = box.getCenter(new THREE.Vector3());
         maxDim = Math.max(size.x, size.y, size.z);
     }
-    
+
     // Calculate view dimensions
-    const viewWidth = size.x * 1.2;
-    const viewHeight = size.y * 1.2;
-    
+    const viewWidth = size.x * 1.1;  // Adjust this: lower = closer (try 1.0 - 1.3)
+    const viewHeight = size.y * 1.1; // Adjust this: lower = closer (try 1.0 - 1.3)
+
     // Calculate distance based on field of view
     const fov = camera.fov * (Math.PI / 180);
     const cameraDistance = Math.max(viewWidth, viewHeight) / Math.tan(fov / 2);
-    
+
     // Position camera slightly elevated and straight on
     camera.position.set(
         center.x,
         center.y + maxDim * 0.2,  // Slight elevation
-        center.z + cameraDistance * 0.7
+        center.z + cameraDistance * 0.6  // Adjust this: lower = closer (try 0.5 - 0.8)
     );
-    
+
     // Look at the center
     controls.target.set(center.x, center.y, center.z);
     controls.update();
@@ -141,7 +141,7 @@ document.getElementById('fileInput').addEventListener('change', function () {
         const bbox = new THREE.Box3().setFromObject(new THREE.Mesh(geometry));
         const bboxcenter = bbox.getCenter(new THREE.Vector3());
         geometry.translate(-bboxcenter.x, -bboxcenter.y, -bboxcenter.z);
-        
+
         // Position mesh towards the left, accounting for mirrored space
         const size = bbox.getSize(new THREE.Vector3());
         geometry.translate(-size.x * 0.5, 0, 0);
@@ -187,7 +187,7 @@ document.getElementById('mirrorYButton').addEventListener('click', function () {
         userMesh.material.opacity = 1;
 
         exportButton.disabled = true;
-        
+
         // Adjust camera back to single model view
         positionCamera(userMesh, null);
     } else if (userMesh) {
@@ -213,7 +213,7 @@ document.getElementById('mirrorYButton').addEventListener('click', function () {
 
         mirrorYExists = true;
         document.getElementById('exportButton').disabled = false;
-        
+
         // Adjust camera to fit both models - pass both meshes
         positionCamera(userMesh, mirrorMesh);
     }
@@ -254,13 +254,13 @@ document.getElementById('resetButton').addEventListener('click', function () {
         const bbox = new THREE.Box3().setFromObject(mesh);
         const center = bbox.getCenter(new THREE.Vector3());
         geometry.translate(-center.x, -center.y, -center.z);
-        
+
         // Position mesh towards the left, accounting for mirrored space
         const size = bbox.getSize(new THREE.Vector3());
         geometry.translate(-size.x * 0.5, 0, 0);
 
         scene.add(mesh);
-        
+
         // Position camera for optimal viewing
         positionCamera(mesh, false);
     }, undefined, function (error) {
