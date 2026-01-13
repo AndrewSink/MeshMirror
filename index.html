@@ -3,40 +3,54 @@
 
     <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>MeshMirror</title>
-        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-        
-      <script type="module" crossorigin src="./assets/index-cc1f30c2.js"></script>
-      <link rel="stylesheet" href="./assets/index-8ff92dc3.css">
+        <link rel="stylesheet" href="style.css">
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                    "three/examples/jsm/controls/OrbitControls": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js",
+                    "three/examples/jsm/loaders/STLLoader.js": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/STLLoader.js",
+                    "three/addons/exporters/STLExporter.js": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/exporters/STLExporter.js"
+                }
+            }
+        </script>
     </head>
 
     <body>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-sm-2 bg-secondary sidebar">
-                    <h5 class="my-3 text-center">MeshMirror</h5>
-                    <button class="btn btn-info my-2" id="uploadButton">Upload .STL</button>
-                    <input type="file" id="fileInput" style="display:none;">
-                    <br>
-                    <br>
-                    <button id="mirrorYButton" class="btn btn-primary btn-check my-2">Mirror</button>
-                    <br>
-                    <br>
-                    <button id="exportButton" class="btn btn-primary my-2" disabled>Export Mirrored .STL</button>
+        <div class="sidebar">
+            <h1 class="title">MeshMirror</h1>
+            
+            <div class="section">
+                <h3 class="section-title">File & View</h3>
+                <button class="btn btn-primary" id="uploadButton">Upload STL</button>
+                <input type="file" id="fileInput" style="display:none;" accept=".stl">
+            </div>
 
-                </div>
-                <div class="col-sm-10 main-content">
-                    <div id="canvas-container"></div>
-                </div>
+            <div class="section">
+                <h3 class="section-title">Model Controls</h3>
+                <button class="btn btn-success" id="mirrorYButton">Mirror</button>
+                <button class="btn btn-danger" id="resetButton">Reset</button>
+            </div>
+
+            <div class="section">
+                <h3 class="section-title">Export</h3>
+                <button class="btn btn-secondary" id="exportButton" disabled>Export Mirrored .STL</button>
+            </div>
+
+            <div class="credits">
+                Andrew Sink - 2025<br>
+                <a href="https://www.thingiverse.com/thing:23902" target="_blank">Garden Toad 3D Model by pmoews / CC BY 4.0</a><br><br>
+                Full Code: <a href="https://github.com/AndrewSink/MeshMirror" target="_blank">GitHub</a>
             </div>
         </div>
-        <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-        
+
+        <div id="canvas-container"></div>
+
+        <script type="module" src="script.js"></script>
 
         <div class="ko-fi">
-
             <script src='https://storage.ko-fi.com/cdn/scripts/overlay-widget.js'></script>
             <script>
                 kofiWidgetOverlay.draw('andrewsink', {
@@ -47,12 +61,6 @@
                 });
             </script>
         </div>
-
-        <div class="credits">Andrew Sink - 2023 <br>
-            <a href="https://www.thingiverse.com/thing:23902">Garden Toad 3D Model by pmoews / CC BY 4.0</a>
-
-            <br>
-
     </body>
 
 </html>

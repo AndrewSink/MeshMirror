@@ -4,7 +4,7 @@ import { STLLoader } from 'three/examples/jsm/loaders/STLLoader.js';
 import { STLExporter } from 'three/addons/exporters/STLExporter.js';
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xd3d3d3);
+scene.background = new THREE.Color(0xe8e8e8); // Light gray background
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100000);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -18,23 +18,19 @@ const material = new THREE.MeshStandardMaterial({ color: lightBlue });
 material.receiveShadow = true;
 material.castShadow = true;
 
-const ambientLight = new THREE.AmbientLight(0x909090); // Soft white light
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6); // Brighter ambient light
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-directionalLight.position.set(1, 1, 1);
+const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+directionalLight.position.set(5, 10, 7.5);
+directionalLight.castShadow = true;
 scene.add(directionalLight);
 
-const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.2);
-directionalLight2.position.set(15, 15, 15);
+const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.3);
+directionalLight2.position.set(-5, 5, -5);
 scene.add(directionalLight2);
 
-const directionalLight3 = new THREE.DirectionalLight(0xffffff, 0.2);
-directionalLight3.position.set(-10, -10, -10);
-scene.add(directionalLight3);
-
 renderer.shadowMap.enabled = true;
-
 
 const loader = new STLLoader();
 loader.load('toad.stl', function (geometry) {
@@ -49,15 +45,15 @@ loader.load('toad.stl', function (geometry) {
     const bbox = new THREE.Box3().setFromObject(mesh);
     const center = bbox.getCenter(new THREE.Vector3());
     geometry.translate(-center.x, -center.y, -center.z);
-    geometry.translate(-10, 0, 0);
+    
+    // Position mesh towards the left, accounting for mirrored space
+    const size = bbox.getSize(new THREE.Vector3());
+    geometry.translate(-size.x * 0.5, 0, 0);
 
     scene.add(mesh);
-    const box = new THREE.Box3().setFromObject(mesh);
-    const size = box.getSize(new THREE.Vector3());
-    const distance = Math.max(size.x, size.y, size.z);
-    camera.position.set(center.x, center.y + (distance * 3), center.z + (distance * 2));
-    controls.target.set(center.x, center.y, center.z);
-    controls.update();
+    
+    // Position camera for optimal viewing
+    positionCamera(mesh, null);
 }, undefined, function (error) {
     console.error('An error happened', error);
 });
@@ -65,8 +61,55 @@ loader.load('toad.stl', function (geometry) {
 console.log('Happy birthday, Gary!')
 const controls = new OrbitControls(camera, renderer.domElement);
 
+controls.mouseButtons = {
+    LEFT: THREE.MOUSE.ROTATE,
+    MIDDLE: THREE.MOUSE.PAN,
+    RIGHT: THREE.MOUSE.ROTATE
+}
+
 // Initialize TransformControls
 let transformControls;
+
+// Helper function to position camera for optimal viewing
+function positionCamera(mesh, mirrorMesh = null) {
+    let box, size, center, maxDim;
+    
+    if (mirrorMesh) {
+        // Calculate bounding box that encompasses both models
+        box = new THREE.Box3().setFromObject(mesh);
+        const mirrorBox = new THREE.Box3().setFromObject(mirrorMesh);
+        box.union(mirrorBox); // Combine both bounding boxes
+        
+        size = box.getSize(new THREE.Vector3());
+        center = box.getCenter(new THREE.Vector3());
+        maxDim = Math.max(size.x, size.y, size.z);
+    } else {
+        // Single model view
+        box = new THREE.Box3().setFromObject(mesh);
+        size = box.getSize(new THREE.Vector3());
+        center = box.getCenter(new THREE.Vector3());
+        maxDim = Math.max(size.x, size.y, size.z);
+    }
+    
+    // Calculate view dimensions
+    const viewWidth = size.x * 1.2;
+    const viewHeight = size.y * 1.2;
+    
+    // Calculate distance based on field of view
+    const fov = camera.fov * (Math.PI / 180);
+    const cameraDistance = Math.max(viewWidth, viewHeight) / Math.tan(fov / 2);
+    
+    // Position camera slightly elevated and straight on
+    camera.position.set(
+        center.x,
+        center.y + maxDim * 0.2,  // Slight elevation
+        center.z + cameraDistance * 0.7
+    );
+    
+    // Look at the center
+    controls.target.set(center.x, center.y, center.z);
+    controls.update();
+}
 
 window.addEventListener('resize', function () {
     const width = window.innerWidth;
@@ -98,7 +141,10 @@ document.getElementById('fileInput').addEventListener('change', function () {
         const bbox = new THREE.Box3().setFromObject(new THREE.Mesh(geometry));
         const bboxcenter = bbox.getCenter(new THREE.Vector3());
         geometry.translate(-bboxcenter.x, -bboxcenter.y, -bboxcenter.z);
-        geometry.translate(-10, 0, 0); // Or the amount you prefer
+        
+        // Position mesh towards the left, accounting for mirrored space
+        const size = bbox.getSize(new THREE.Vector3());
+        geometry.translate(-size.x * 0.5, 0, 0);
 
         const material = new THREE.MeshStandardMaterial({ color: lightBlue });
         const mesh = new THREE.Mesh(geometry, material);
@@ -112,7 +158,6 @@ document.getElementById('fileInput').addEventListener('change', function () {
             transformControls.detach(transformControls.object);
         }
 
-
         if (previousUserMesh) {
             scene.remove(previousUserMesh);
         }
@@ -120,20 +165,12 @@ document.getElementById('fileInput').addEventListener('change', function () {
             scene.remove(previousMirrorMesh);
         }
         document.getElementById('exportButton').disabled = true;
-
+        mirrorYExists = false;
 
         scene.add(mesh);
 
-        const box = new THREE.Box3().setFromObject(mesh);
-        const center = box.getCenter(new THREE.Vector3());
-        const size = box.getSize(new THREE.Vector3());
-        const distance = Math.max(size.x, size.y, size.z);
-
-
-        // camera.position.set(center.x, center.y + distance, center.z + distance);
-
-        controls.target.set(center.x, center.y, center.z);
-        controls.update();
+        // Position camera for optimal viewing
+        positionCamera(mesh, false);
 
     });
     reader.readAsArrayBuffer(file);
@@ -149,7 +186,10 @@ document.getElementById('mirrorYButton').addEventListener('click', function () {
         userMesh.material.color.setHex(originalMeshColor);
         userMesh.material.opacity = 1;
 
-        exportButton.disabled = true; // Disable the export button when the mirrored mesh is removed
+        exportButton.disabled = true;
+        
+        // Adjust camera back to single model view
+        positionCamera(userMesh, null);
     } else if (userMesh) {
         if (previousMirrorMesh) {
             scene.remove(previousMirrorMesh);
@@ -164,18 +204,68 @@ document.getElementById('mirrorYButton').addEventListener('click', function () {
         mirrorMesh.scale.x *= -1;
         mirrorMesh.position.z = userMesh.position.z;
 
-
         let boundingBox = new THREE.Box3().setFromObject(userMesh);
         let size = boundingBox.getSize(new THREE.Vector3());
-        mirrorMesh.position.x += (size.x);  // Subtracting a constant value
-
+        mirrorMesh.position.x += (size.x);
 
         mirrorMesh.name = 'mirrorMesh';
         scene.add(mirrorMesh);
 
         mirrorYExists = true;
         document.getElementById('exportButton').disabled = false;
+        
+        // Adjust camera to fit both models - pass both meshes
+        positionCamera(userMesh, mirrorMesh);
     }
+});
+
+document.getElementById('resetButton').addEventListener('click', function () {
+    // Remove all meshes from the scene
+    const userMesh = scene.getObjectByName('userMesh');
+    const mirrorMesh = scene.getObjectByName('mirrorMesh');
+
+    if (userMesh) {
+        scene.remove(userMesh);
+    }
+    if (mirrorMesh) {
+        scene.remove(mirrorMesh);
+    }
+
+    // Reset mirror state
+    mirrorYExists = false;
+
+    // Disable export button
+    document.getElementById('exportButton').disabled = true;
+
+    // Clear file input
+    document.getElementById('fileInput').value = '';
+
+    // Load default toad model
+    const loader = new STLLoader();
+    loader.load('toad.stl', function (geometry) {
+        geometry.rotateX(-Math.PI / 2);
+        const material = new THREE.MeshStandardMaterial({ color: lightBlue });
+        material.receiveShadow = true;
+        material.castShadow = true;
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.name = 'userMesh';
+
+        const bbox = new THREE.Box3().setFromObject(mesh);
+        const center = bbox.getCenter(new THREE.Vector3());
+        geometry.translate(-center.x, -center.y, -center.z);
+        
+        // Position mesh towards the left, accounting for mirrored space
+        const size = bbox.getSize(new THREE.Vector3());
+        geometry.translate(-size.x * 0.5, 0, 0);
+
+        scene.add(mesh);
+        
+        // Position camera for optimal viewing
+        positionCamera(mesh, false);
+    }, undefined, function (error) {
+        console.error('An error happened', error);
+    });
 });
 
 document.getElementById('exportButton').addEventListener('click', function () {
